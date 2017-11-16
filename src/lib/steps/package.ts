@@ -1,7 +1,6 @@
 import * as path from 'path';
 import { NgPackageConfig } from '../../ng-package.schema';
 import { NgPackageData, DEFAULT_BUILD_FOLDER } from '../model/ng-package-data';
-import { NgArtifacts } from '../model/ng-artifacts';
 import { tryReadJson } from '../util/json';
 import { readJson, writeJson, readdir, lstat, Stats } from 'fs-extra';
 import { merge, isArray } from 'lodash';
@@ -242,12 +241,12 @@ export async function discoverPackages(rootPath: string): Promise<PackageSearchR
  * @param ngPkg Angular package data
  * @param packageArtifacts Package artifacts to merge into package.json
  */
-export async function writePackage(ngPkg: NgPackageData, packageArtifacts: NgArtifacts): Promise<void> {
+export async function writePackage(ngPkg: NgPackageData, packageArtifacts: { [key: string]: string }): Promise<void> {
 
   log.debug('writePackage');
   const packageJson: any = await readJson(path.resolve(ngPkg.sourcePath, PACKAGE_JSON_FILE_NAME));
   // set additional properties
-  for(const fieldName in packageArtifacts) {
+  for (const fieldName in packageArtifacts) {
     packageJson[fieldName] = packageArtifacts[fieldName];
   }
 

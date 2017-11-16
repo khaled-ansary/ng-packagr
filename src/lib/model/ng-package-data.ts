@@ -1,10 +1,13 @@
+import * as path from 'path';
 import { NgPackageConfig } from '../../ng-package.schema';
-import { path } from '../util/path';
+import { ensureUnixPath } from '../util/path';
 
 export const SCOPE_PREFIX = '@';
 export const SCOPE_NAME_SEPARATOR = '/';
 export const DEFAULT_BUILD_FOLDER = '.ng_pkg_build';
 
+// TODO: this is obviously stuff derived from 'ng-package.json'
+// TODO: use @ngtools/json-schema to parse the JSON configuration
 export class NgPackageData {
   public readonly pathOffsetFromSourceRoot: string;
   public readonly fullPackageName: string;
@@ -37,7 +40,7 @@ export class NgPackageData {
     this.pathOffsetFromSourceRoot = this.sourcePath.substring(rootSourcePath.length);
     // destination path of secondary modules is not configurable - this is to meet the Angular package format.
     this.destinationPath = rootDestinationPath + this.pathOffsetFromSourceRoot;
-    this.fullPackageName = path.ensureUnixPath(rootPackageName + this.pathOffsetFromSourceRoot);
+    this.fullPackageName = ensureUnixPath(rootPackageName + this.pathOffsetFromSourceRoot);
     this.moduleName = this.fullPackageName.replace(SCOPE_PREFIX, '').split(SCOPE_NAME_SEPARATOR).join('.');
 
     if (this.fullPackageName.startsWith(SCOPE_PREFIX)) {
@@ -73,5 +76,14 @@ export class NgPackageData {
     const packageBuildFolderName: string = this.fullPackageName.replace(SCOPE_NAME_SEPARATOR, '-');
     this.buildDirectory = path.resolve(this.rootSourcePath, DEFAULT_BUILD_FOLDER, packageBuildFolderName);
   }
-}
 
+  get umdPackageName(): string {
+    return this.packageNameWithoutScope.replace(SCOPE_NAME_SEPARATOR, '-') + '.umd.js';
+  }
+
+  private _unixPathJoin(...paths: string[]): string {
+    const joined: string = path.join(...paths);
+    return ensureUnixPath(joined);
+  }
+
+}
